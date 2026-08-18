@@ -21,15 +21,19 @@ jobs:
 
       - name: Clean and Fix Duplicate Paths
         run: |
-          # Se os arquivos estiverem em subpastas, move o código para a raiz principal
           if [ -d "ChickClientS" ]; then
             cp -r ChickClientS/src . || true
-            # Remove arquivos de configuração antigos que estão bugando o processo
             rm -f ChickClientS/build.gradle || true
             rm -f ChickClientS/settings.gradle || true
           fi
-          
-          # Garante a pasta de recursos correta para o fabric.mod.json
           mkdir -p src/main/resources
           find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
 
+      - name: Build Mod with Gradle
+        run: gradle build --no-daemon
+
+      - name: Upload Compiled Jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChickClient-Jar
+          path: "**/*.jar"
