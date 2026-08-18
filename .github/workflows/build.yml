@@ -14,31 +14,30 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
 
-      - name: Setup Gradle 8.10
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.10'
-
-      - name: Hard Clean and Fix Paths
+      - name: Build with Clean Template
         run: |
-          # 1. Se os códigos estiverem na subpasta, salva eles na raiz primeiro
-          if [ -d "ChickClientS/src" ]; then
-            cp -r ChickClientS/src . || true
-          fi
+          # 1. Baixa a base oficial do Fabric em uma pasta temporaria chamada 'clean-mod'
+          git clone --depth 1 https://github.com clean-mod
           
-          # 2. DELETA completamente a pasta duplicada inteira e os arquivos fantasmas ocultos nela
-          rm -rf ChickClientS || true
-          rm -f src/main/java/net/fabricmc/example/src/main/resources/fabric.mod.json || true
+          # 2. Remove o codigo de exemplo original deles para nao dar conflito
+          rm -rf clean-mod/src/main/java/net/fabricmc/example/*
+          rm -f clean-mod/src/main/resources/fabric.mod.json
           
-          # 3. Garante a pasta de recursos correta e limpa para o fabric.mod.json
-          mkdir -p src/main/resources
-          find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
-
-      - name: Build Mod with Gradle
-        run: gradle build --no-daemon
+          # 3. Procura os SEUS codigos que voce ja criou e joga dentro da estrutura perfeita do Fabric
+          find . -name "ChickClientPvpMod.java" -exec cp {} clean-mod/src/main/java/net/fabricmc/example/ \;
+          find . -name "fabric.mod.json" -exec cp {} clean-mod/src/main/resources/ \;
+          
+          # 4. Entra na pasta limpa e roda a compilacao oficial do Fabric
+          cd clean-mod
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+          
+          # 5. Manda o .jar final de volta para a pasta de uploads do GitHub
+          mkdir -p ../build/libs
+          cp build/libs/*.jar ../build/libs/ || cp build/libs/*.jar ../build/libs/ || true
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
         with:
           name: ChickClient-Jar
-          path: "**/*.jar"
+          path: "**/build/libs/*.jar"
