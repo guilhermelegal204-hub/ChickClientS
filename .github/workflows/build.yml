@@ -5,8 +5,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout Your Code
         uses: actions/checkout@v4
+        with:
+          path: user-code
+
+      - name: Checkout Fabric Template Base
+        uses: actions/checkout@v4
+        with:
+          repository: FabricMC/fabric-example-mod
+          path: fabric-template
 
       - name: Setup Java 21
         uses: actions/setup-java@v4
@@ -14,30 +22,29 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
 
-      - name: Build with Clean Template
+      - name: Setup Gradle 8.10
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
+
+      - name: Inject Your Code Into Template
         run: |
-          # 1. Baixa a base oficial do Fabric em uma pasta temporaria chamada 'clean-mod'
-          git clone --depth 1 https://github.com clean-mod
+          # 1. Limpa o codigo original do template
+          rm -rf fabric-template/src/main/java/net/fabricmc/example/*
+          rm -f fabric-template/src/main/resources/fabric.mod.json
           
-          # 2. Remove o codigo de exemplo original deles para nao dar conflito
-          rm -rf clean-mod/src/main/java/net/fabricmc/example/*
-          rm -f clean-mod/src/main/resources/fabric.mod.json
-          
-          # 3. Procura os SEUS codigos que voce ja criou e joga dentro da estrutura perfeita do Fabric
-          find . -name "ChickClientPvpMod.java" -exec cp {} clean-mod/src/main/java/net/fabricmc/example/ \;
-          find . -name "fabric.mod.json" -exec cp {} clean-mod/src/main/resources/ \;
-          
-          # 4. Entra na pasta limpa e roda a compilacao oficial do Fabric
-          cd clean-mod
+          # 2. Encontra o SEU codigo e joga na pasta certa do template
+          find user-code/ -name "ChickClientPvpMod.java" -exec cp {} fabric-template/src/main/java/net/fabricmc/example/ \;
+          find user-code/ -name "fabric.mod.json" -exec cp {} fabric-template/src/main/resources/ \;
+
+      - name: Build Mod with Gradle
+        run: |
+          cd fabric-template
           chmod +x gradlew
           ./gradlew build --no-daemon
-          
-          # 5. Manda o .jar final de volta para a pasta de uploads do GitHub
-          mkdir -p ../build/libs
-          cp build/libs/*.jar ../build/libs/ || cp build/libs/*.jar ../build/libs/ || true
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
         with:
           name: ChickClient-Jar
-          path: "**/build/libs/*.jar"
+          path: fabric-template/build/libs/*.jar
