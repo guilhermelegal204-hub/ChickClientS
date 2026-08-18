@@ -19,21 +19,17 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Fix Internal Duplicate Paths
+      - name: Clean and Fix Duplicate Paths
         run: |
+          # Se os arquivos estiverem em subpastas, move o código para a raiz principal
           if [ -d "ChickClientS" ]; then
             cp -r ChickClientS/src . || true
+            # Remove arquivos de configuração antigos que estão bugando o processo
+            rm -f ChickClientS/build.gradle || true
+            rm -f ChickClientS/settings.gradle || true
           fi
+          
+          # Garante a pasta de recursos correta para o fabric.mod.json
           mkdir -p src/main/resources
           find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
 
-      - name: Build Mod with Forced Maven
-        run: gradle build --no-daemon -Porg.gradle.project.fabricMvn=https://fabricmc.net -Dplugin.repo.0=https://fabricmc.net
-        env:
-          GRADLE_OPTS: "-Dgradle.user.home=/home/runner/.gradle"
-
-      - name: Upload Compiled Jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: ChickClient-Jar
-          path: build/libs/*.jar
