@@ -14,27 +14,16 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
 
-      - name: Clone Fabric Template Base
+      - name: Compile Mod
         run: |
-          git clone --depth 1 https://github.com template
+          git clone --depth=1 https://github.com template
           cd template
-          # Remove o código de exemplo original
           rm -rf src/main/java/net/fabricmc/example/*
           rm -f src/main/resources/fabric.mod.json
-          
-          # Move os SEUS arquivos do Chick Client para dentro do template correto
           cp -r ../src . || cp -r ../ChickClientS/src . || true
-          
-          # Caso o fabric.mod.json esteja em caminhos duplicados, move para o lugar certo
           find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
-          
-          # Garante que o Gradle do template tenha permissão para rodar
           chmod +x gradlew
-          
-          # Compila o mod usando a estrutura oficial deles
           ./gradlew build --no-daemon
-          
-          # Move o arquivo .jar final gerado de volta para o repositório principal
           mkdir -p ../build/libs
           cp build/libs/*.jar ../build/libs/
 
