@@ -19,13 +19,18 @@ jobs:
         with:
           gradle-version: '8.10'
 
-      - name: Clean and Fix Duplicate Paths
+      - name: Hard Clean and Fix Paths
         run: |
-          if [ -d "ChickClientS" ]; then
+          # 1. Se os códigos estiverem na subpasta, salva eles na raiz primeiro
+          if [ -d "ChickClientS/src" ]; then
             cp -r ChickClientS/src . || true
-            rm -f ChickClientS/build.gradle || true
-            rm -f ChickClientS/settings.gradle || true
           fi
+          
+          # 2. DELETA completamente a pasta duplicada inteira e os arquivos fantasmas ocultos nela
+          rm -rf ChickClientS || true
+          rm -f src/main/java/net/fabricmc/example/src/main/resources/fabric.mod.json || true
+          
+          # 3. Garante a pasta de recursos correta e limpa para o fabric.mod.json
           mkdir -p src/main/resources
           find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
 
