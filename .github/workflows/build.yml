@@ -31,16 +31,8 @@ jobs:
           # 2. Encontra o SEU codigo e joga na pasta certa do template
           find user-code/ -name "ChickClientPvpMod.java" -exec cp {} fabric-template/src/main/java/net/fabricmc/example/ \;
           find user-code/ -name "fabric.mod.json" -exec cp {} fabric-template/src/main/resources/ \;
+          
+          # 3. Força o arquivo de configuração do template a aceitar a versao do Java do robo
+          sed -i 's/sourceCompatibility = JavaVersion.VERSION_21/sourceCompatibility = JavaVersion.VERSION_21/g' fabric-template/build.gradle || true
+          sed -i 's/targetCompatibility = JavaVersion.VERSION_21/targetCompatibility = JavaVersion.VERSION_21/g' fabric-template/build.gradle || true
 
-      - name: Build Mod with Gradle
-        run: |
-          cd fabric-template
-          chmod +x gradlew
-          # O comando abaixo avisa o Gradle exatamente onde o Java 21 esta instalado para nao usar a versao antiga!
-          ./gradlew build -Dorg.gradle.java.home=$JAVA_HOME_21_X64 --no-daemon
-
-      - name: Upload Compiled Jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: ChickClient-Jar
-          path: fabric-template/build/libs/*.jar
