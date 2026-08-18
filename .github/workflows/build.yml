@@ -36,3 +36,14 @@ jobs:
           sed -i 's/sourceCompatibility = JavaVersion.VERSION_21/sourceCompatibility = JavaVersion.VERSION_21/g' fabric-template/build.gradle || true
           sed -i 's/targetCompatibility = JavaVersion.VERSION_21/targetCompatibility = JavaVersion.VERSION_21/g' fabric-template/build.gradle || true
 
+      - name: Build Mod with Gradle
+        run: |
+          cd fabric-template
+          chmod +x gradlew
+          ./gradlew build --no-daemon
+
+      - name: Upload Compiled Jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: ChickClient-Jar
+          path: "**/*.jar"
