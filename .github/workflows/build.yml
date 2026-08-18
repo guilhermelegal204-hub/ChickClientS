@@ -27,8 +27,10 @@ jobs:
           mkdir -p src/main/resources
           find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
 
-      - name: Build Mod with Gradle
-        run: gradle build --no-daemon
+      - name: Build Mod with Forced Maven
+        run: gradle build --no-daemon -Porg.gradle.project.fabricMvn=https://fabricmc.net -Dplugin.repo.0=https://fabricmc.net
+        env:
+          GRADLE_OPTS: "-Dgradle.user.home=/home/runner/.gradle"
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
