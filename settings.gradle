@@ -1,9 +1,16 @@
 pluginManagement {
     repositories {
-        maven { url = 'https://maven.fabricmc.net/' }
+        maven {
+            name = "Fabric"
+            url = uri("https://fabricmc.net")
+        }
         mavenCentral()
         gradlePluginPortal()
     }
 }
 
-rootProject.name = 'ChickClient'
+plugins {
+    id("net.fabricmc.loom") version "1.7-SNAPSHOT" apply false
+}
+
+rootProject.name = "ChickClient"
