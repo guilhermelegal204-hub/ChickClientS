@@ -14,22 +14,23 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
 
-      - name: Create Structure and Compile
+      - name: Setup Official Gradle Wrapper
         run: |
-          # Cria a pasta raiz onde o Gradle trabalha
-          mkdir -p src/main/java/net/fabricmc/example
-          mkdir -p src/main/resources
-          
-          # Copia os SEUS arquivos salvos para a pasta raiz padrão do projeto
-          cp ChickClientS/src/main/java/net/fabricmc/example/ChickClientPvpMod.java src/main/java/net/fabricmc/example/ || true
-          cp ChickClientS/src/main/java/net/fabricmc/example/src/main/resources/fabric.mod.json src/main/resources/ || true
-          
-          # Baixa o inicializador do Gradle direto da maquina virtual do GitHub
-          gradle wrapper --gradle-version 8.7
+          gradle wrapper --gradle-version 8.10
           chmod +x gradlew
-          
-          # Compila o mod de forma limpa
-          ./gradlew build --no-daemon
+
+      - name: Fix Internal Duplicate Paths
+        run: |
+          # Se os arquivos estiverem perdidos em subpastas com o nome do projeto, move para a raiz padrão
+          if [ -d "ChickClientS" ]; then
+            cp -r ChickClientS/src . || true
+          fi
+          # Garante que o fabric.mod.json esteja no lugar certo
+          mkdir -p src/main/resources
+          find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
+
+      - name: Build Mod with Gradle
+        run: ./gradlew build --no-daemon
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
