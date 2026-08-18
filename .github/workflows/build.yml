@@ -16,11 +16,11 @@ jobs:
           repository: FabricMC/fabric-example-mod
           path: fabric-template
 
-      - name: Setup Java 21
+      - name: Setup Java 25
         uses: actions/setup-java@v4
         with:
           distribution: 'microsoft'
-          java-version: '21'
+          java-version: '25'
 
       - name: Inject Your Code Into Template
         run: |
@@ -31,16 +31,12 @@ jobs:
           # 2. Encontra o SEU codigo e joga na pasta certa do template
           find user-code/ -name "ChickClientPvpMod.java" -exec cp {} fabric-template/src/main/java/net/fabricmc/example/ \;
           find user-code/ -name "fabric.mod.json" -exec cp {} fabric-template/src/main/resources/ \;
-          
-          # 3. Força o arquivo de configuração do template a aceitar a versao do Java do robo
-          sed -i 's/sourceCompatibility = JavaVersion.VERSION_21/sourceCompatibility = JavaVersion.VERSION_21/g' fabric-template/build.gradle || true
-          sed -i 's/targetCompatibility = JavaVersion.VERSION_21/targetCompatibility = JavaVersion.VERSION_21/g' fabric-template/build.gradle || true
 
       - name: Build Mod with Gradle
         run: |
           cd fabric-template
           chmod +x gradlew
-          ./gradlew build --no-daemon
+          ./gradlew build -Dorg.gradle.java.home=$JAVA_HOME_25_X64 --no-daemon
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
