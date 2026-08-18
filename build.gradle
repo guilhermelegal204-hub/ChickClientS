@@ -1,12 +1,23 @@
+pluginManagement {
+    repositories {
+        maven { name = 'Fabric'; url = 'https://fabricmc.net' }
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
 plugins {
     id 'fabric-loom' version '1.7-SNAPSHOT'
     id 'maven-publish'
 }
+
 version = '1.21.11'
 group = 'net.fabricmc.example'
+
 repositories {
     mavenCentral()
 }
+
 dependencies {
     minecraft "com.mojang:minecraft:1.21.1"
     mappings "net.fabricmc:yarn:1.21.1+build.2:v2"
