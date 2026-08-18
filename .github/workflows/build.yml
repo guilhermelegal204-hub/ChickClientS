@@ -14,18 +14,22 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
 
-      - name: Compile Mod
+      - name: Create Structure and Compile
         run: |
-          git clone --depth=1 https://github.com template
-          cd template
-          rm -rf src/main/java/net/fabricmc/example/*
-          rm -f src/main/resources/fabric.mod.json
-          cp -r ../src . || cp -r ../ChickClientS/src . || true
-          find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
+          # Cria a pasta raiz onde o Gradle trabalha
+          mkdir -p src/main/java/net/fabricmc/example
+          mkdir -p src/main/resources
+          
+          # Copia os SEUS arquivos salvos para a pasta raiz padrão do projeto
+          cp ChickClientS/src/main/java/net/fabricmc/example/ChickClientPvpMod.java src/main/java/net/fabricmc/example/ || true
+          cp ChickClientS/src/main/java/net/fabricmc/example/src/main/resources/fabric.mod.json src/main/resources/ || true
+          
+          # Baixa o inicializador do Gradle direto da maquina virtual do GitHub
+          gradle wrapper --gradle-version 8.7
           chmod +x gradlew
+          
+          # Compila o mod de forma limpa
           ./gradlew build --no-daemon
-          mkdir -p ../build/libs
-          cp build/libs/*.jar ../build/libs/
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
