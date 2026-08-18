@@ -14,23 +14,21 @@ jobs:
           distribution: 'microsoft'
           java-version: '21'
 
-      - name: Setup Official Gradle Wrapper
-        run: |
-          gradle wrapper --gradle-version 8.10
-          chmod +x gradlew
+      - name: Setup Gradle 8.10
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10'
 
       - name: Fix Internal Duplicate Paths
         run: |
-          # Se os arquivos estiverem perdidos em subpastas com o nome do projeto, move para a raiz padrão
           if [ -d "ChickClientS" ]; then
             cp -r ChickClientS/src . || true
           fi
-          # Garante que o fabric.mod.json esteja no lugar certo
           mkdir -p src/main/resources
           find src/ -name "fabric.mod.json" -exec cp {} src/main/resources/fabric.mod.json \; 2>/dev/null || true
 
       - name: Build Mod with Gradle
-        run: ./gradlew build --no-daemon
+        run: gradle build --no-daemon
 
       - name: Upload Compiled Jar
         uses: actions/upload-artifact@v4
